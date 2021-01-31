@@ -53,36 +53,36 @@ const typeDefs = gql`
 
 const resolvers = {
 	Author: {
-		books({ id }, args, context, info) {
+		books: async (root, args, context, info) => {
 			const fields = getMongooseSelectedFields(info)
-			return BookModel.find({ owner: id }).select(fields).lean()
+			return BookModel.find({ owner: root._id }).select(fields).lean()
 		}
 	},
 
 	Book: {
-		owner(root, args, context, info) {
+		owner: async (root, args, context, info) => {
 			const fields = getMongooseSelectedFields(info)
-			return AuthorModel.findById(root).select(fields).lean()
+			return AuthorModel.findById(root.owner).select(fields).lean()
 		}
 	},
 
 	Query: {
-		authors: (root, args, context, info) => {
+		authors: async (root, args, context, info) => {
 			const fields = getMongooseSelectedFields(info)
 			return AuthorModel.find({}).select(fields).lean()
 		},
 
-		author: (root, { id }, context, info) => {
+		author: async (root, { id }, context, info) => {
 			const fields = getMongooseSelectedFields(info)
 			return AuthorModel.findById(id).select(fields).lean()
 		},
 
-		books: (root, args, context, info) => {
+		books: async (root, args, context, info) => {
 			const fields = getMongooseSelectedFields(info)
 			return BookModel.find({}).select(fields).lean()
 		},
 
-		book: (root, { id }, context, info) => {
+		book: async (root, { id }, context, info) => {
 			const fields = getMongooseSelectedFields(info)
 			return BookModel.findById(id).select(fields).lean()
 		}
