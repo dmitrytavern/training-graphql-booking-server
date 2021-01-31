@@ -1,0 +1,8 @@
+FROM mongo
+COPY setup.js /docker-entrypoint-initdb.d/
+
+ENV MONGO_INITDB_ROOT_USERNAME root
+ENV MONGO_INITDB_ROOT_PASSWORD root
+ENV MONGO_INITDB_DATABASE test
+
+EXPOSE 27017
