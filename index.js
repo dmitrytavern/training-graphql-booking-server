@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const { ApolloServer, ApolloError, gql, PubSub, withFilter } = require('apollo-server')
+const getMongooseSelectedFields = require('./utils/getMongooseSelectedFields')
 
 const BookModel = require('./models/Books')
 const AuthorModel = require('./models/Author')
@@ -12,32 +13,19 @@ const typeDefs = gql`
 		success: Boolean
 	}
 
-	type BookBase {
-		_id: String
-		title: String
-		reviews: String
-	}
-
-	type AuthorBase {
-		name: String
-		email: String
-	}
-
-
 	type Book {
 		_id: String
 		title: String
 		reviews: String
-		owner: AuthorBase
+		owner: Author
 	}
 
 	type Author {
 		_id: String
 		name: String
 		email: String
-		books: [BookBase]
+		books: [Book]
 	}
-	
 
 	type Subscription {
 	  updatedBookReview(id: String): Book
@@ -64,29 +52,39 @@ const typeDefs = gql`
 `;
 
 const resolvers = {
+	Author: {
+		books({ id }, args, context, info) {
+			const fields = getMongooseSelectedFields(info)
+			return BookModel.find({ owner: id }).select(fields).lean()
+		}
+	},
+
+	Book: {
+		owner(root, args, context, info) {
+			const fields = getMongooseSelectedFields(info)
+			return AuthorModel.findById(root).select(fields).lean()
+		}
+	},
+
 	Query: {
-		authors: () => {
-			return AuthorModel
-				.find()
-				.populate('books')
+		authors: (root, args, context, info) => {
+			const fields = getMongooseSelectedFields(info)
+			return AuthorModel.find({}).select(fields).lean()
 		},
 
-		author: (_, { id }) => {
-			return AuthorModel
-				.findById(id)
-				.populate('books')
+		author: (root, { id }, context, info) => {
+			const fields = getMongooseSelectedFields(info)
+			return AuthorModel.findById(id).select(fields).lean()
 		},
 
-		books: () => {
-			return BookModel
-				.find()
-				.populate('owner')
+		books: (root, args, context, info) => {
+			const fields = getMongooseSelectedFields(info)
+			return BookModel.find({}).select(fields).lean()
 		},
 
-		book: (_, { id }) => {
-			return BookModel
-				.findById(id)
-				.populate('owner')
+		book: (root, { id }, context, info) => {
+			const fields = getMongooseSelectedFields(info)
+			return BookModel.findById(id).select(fields).lean()
 		}
 	},
 	Mutation: {
@@ -283,6 +281,8 @@ async function start() {
 			useUnifiedTopology: true,
 			useFindAndModify: false
 		})
+
+		mongoose.set('debug', true)
 
 		const pubsub = new PubSub()
 		const server = new ApolloServer({ typeDefs, resolvers, context: { pubsub } })
