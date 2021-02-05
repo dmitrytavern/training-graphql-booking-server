@@ -25,7 +25,7 @@ if (db.getUser(DATABASE_USER) === null) {
 	db["system.users"].update({_id: "admin." + DATABASE_USER}, {$set: {db: DATABASE_NAME}})
 }
 
-db = Mongo().getDB(DATABASE_NAME)
+db.getSiblingDB(DATABASE_NAME)
 
 print('Success script')
 quit(1)

@@ -1,6 +1,6 @@
-const graphqlFields = require('graphql-fields')
+import graphqlFields from 'graphql-fields'
 
-module.exports = function getMongooseSelectedFields (info, fieldPath = null) {
+export default function getMongooseSelectedFields (info, fieldPath = null) {
 	const selections = graphqlFields(info)
 	const mongooseSelection = Object
 		.keys(fieldPath ? selections[fieldPath] : selections)
