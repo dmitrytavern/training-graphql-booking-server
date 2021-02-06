@@ -10,6 +10,10 @@ const schema = new Schema({
 		required: true,
 		unique: true
 	},
+	password: {
+		type: String,
+		required: true
+	},
 	books: [{
 		type: Types.ObjectId,
 		ref: 'Book'

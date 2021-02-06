@@ -1,3 +1,4 @@
+import * as Auth from "./Auth"
 import * as Book from "./Book"
 import * as Author from './Author'
 
@@ -7,6 +8,7 @@ const mutations = []
 const subscriptions = []
 
 const schemas = [
+	Auth,
 	Book,
 	Author
 ]
