@@ -13,9 +13,13 @@ export default {
 	},
 
 	Query: {
-		books: async (root, args, { db }, info) => {
+		books: async (root, { ownerId }, { db, user }, info) => {
 			const fields = getSelectedFields(info)
-			return db.BookModel.find({}).select(fields).lean()
+			const filter = {}
+			if (ownerId) filter.owner = ownerId
+			if (user.id !== ownerId) filter.status = 'published'
+
+			return db.BookModel.find(filter).select(fields).lean()
 		},
 
 		book: async (root, { id }, { db }, info) => {
@@ -25,7 +29,7 @@ export default {
 	},
 
 	Mutation: {
-		async addBook(_, {title, owner}, {pubsub, db}) {
+		async addBook(_, {title, owner, status}, {pubsub, db}) {
 			try {
 
 				// Checking author exists
@@ -41,6 +45,7 @@ export default {
 				const newBook = new db.BookModel({
 					title,
 					owner,
+					status,
 					reviews: 0
 				})
 
@@ -88,10 +93,11 @@ export default {
 			}
 		},
 
-		async updateBook(_, {id, title, db}) {
+		async updateBook(_, {id, title, status}, { db }) {
 			try {
 				await db.BookModel.findByIdAndUpdate(id, {
-					title
+					title,
+					status
 				}, {
 					upsert: true
 				})

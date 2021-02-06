@@ -7,9 +7,16 @@ import { ApolloClient, ApolloLink, InMemoryCache, ApolloProvider, split } from '
 import { HttpLink } from 'apollo-link-http'
 import { WebSocketLink } from '@apollo/client/link/ws'
 import { getMainDefinition } from '@apollo/client/utilities'
+import { setContext } from '@apollo/client/link/context'
+
+let token = null
+
+function setNewAuthToken(newToken) {
+  token = newToken
+}
 
 const httpLink = new HttpLink({
-  uri: "http://localhost:4000",
+  uri: "http://localhost:4000"
 });
 
 const wsLink = new WebSocketLink({
@@ -18,6 +25,15 @@ const wsLink = new WebSocketLink({
     reconnect: true
   }
 });
+
+const authLink = setContext((_, { headers }) => {
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : '',
+    }
+  }
+})
 
 const splitLink = split(
   ({ query }) => {
@@ -28,7 +44,7 @@ const splitLink = split(
     );
   },
   wsLink,
-  httpLink,
+  authLink.concat(httpLink),
 );
 
 const client = new ApolloClient({
@@ -39,7 +55,7 @@ const client = new ApolloClient({
 ReactDOM.render(
   <React.StrictMode>
     <ApolloProvider client={client}>
-      <App />
+      <App apolloSetterToken={setNewAuthToken} />
     </ApolloProvider>
   </React.StrictMode>,
   document.getElementById('root')

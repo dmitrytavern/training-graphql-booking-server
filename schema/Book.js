@@ -4,18 +4,19 @@ export const types = `
 		title: String
 		reviews: String
 		owner: Author
+		status: String
 	}
 `
 
 export const queries = `
-	books: [Book]
+	books(ownerId: String): [Book]
 	book(id: String): Book
 `
 
 export const mutations = `
-  addBook(title: String, owner: String): Book
+  addBook(title: String, owner: String, status: String): Book
   deleteBook(id: String): Message
-  updateBook(id: String, title: String): Message
+  updateBook(id: String, title: String, status: String): Message
   updateBookReview(id: String): Message
 `
 

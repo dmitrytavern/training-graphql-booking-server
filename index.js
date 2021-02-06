@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import { ApolloServer, PubSub } from "apollo-server"
+import jwt from 'jsonwebtoken'
 
 import typeDefs from './schema'
 import resolvers from './resolvers'
@@ -21,11 +22,23 @@ async function start() {
 		const server = new ApolloServer({
 			typeDefs,
 			resolvers,
-			context: {
-				pubsub,
-				db: {
-					BookModel,
-					AuthorModel
+			context: ({ req }) => {
+				const token = req.headers.authorization || ''
+				const user = jwt.verify(token.split(' ')[1], 'SECRET', (err, decoded) => {
+					if (!err) {
+						return decoded
+					} else {
+						return {}
+					}
+				})
+
+				return {
+					user,
+					pubsub,
+					db: {
+						BookModel,
+						AuthorModel
+					}
 				}
 			}
 		})

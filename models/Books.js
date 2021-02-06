@@ -10,6 +10,10 @@ const schema = new Schema({
 		required: true,
 		unique: false
 	},
+	status: {
+		type: String,
+		required: true,
+	},
 	owner: {
 		type: Types.ObjectId,
 		ref: 'Author'

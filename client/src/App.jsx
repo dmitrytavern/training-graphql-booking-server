@@ -3,16 +3,17 @@ import useAuth from "./hooks/auth.hook"
 
 import Router from "./pages/Router"
 
-const App = () => {
+const App = ({ apolloSetterToken }) => {
   const {
+    user,
     autoAuth,
     isAuth,
     login,
     logout
-  } = useAuth()
+  } = useAuth(apolloSetterToken)
 
   return (
-    <AuthContext.Provider value={{autoAuth, isAuth, login, logout}}>
+    <AuthContext.Provider value={{user, autoAuth, isAuth, login, logout}}>
       <Router />
     </AuthContext.Provider>
   )
