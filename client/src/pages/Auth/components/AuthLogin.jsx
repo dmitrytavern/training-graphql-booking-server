@@ -12,8 +12,8 @@ const AuthLogin = () => {
 	const [error, setError] = useState(false)
 	const [errorMessages, setErrorMessages] = useState('')
 	const [formData, setFormData] = useState({
-		email: '',
-		password: ''
+		email: 'v1@gmail.com',
+		password: '1234'
 	})
 
 	const submitHandler = (e) => {
@@ -40,6 +40,7 @@ const AuthLogin = () => {
 				history.push('/author')
 			})
 			.catch((res) => {
+				console.log(res)
 				setError(true)
 				setErrorMessages(res.graphQLErrors[0].extensions.message)
 			})

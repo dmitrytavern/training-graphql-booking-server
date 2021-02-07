@@ -1,10 +1,9 @@
 import { ApolloError } from 'apollo-server'
-import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
 export default {
 	Mutation: {
-		async login(_, { email, password }, { db }) {
+		async login(_, { email, password }, { db, auth }) {
 			try {
 				const author = await db.AuthorModel.findOne({ email })
 
@@ -22,11 +21,11 @@ export default {
 					})
 				}
 
-				const token = await jwt.sign({
+				const token = await auth.sign({
 					id: author._id,
 					name: author.name,
 					email: author.email
-				}, 'SECRET')
+				})
 
 				return {
 					token,
@@ -40,7 +39,7 @@ export default {
 		},
 
 
-		async register(_, { name, email, password }, { db }) {
+		async register(_, { name, email, password }, { db, auth }) {
 			try {
 				const existsEmail = await db.AuthorModel.exists({ email })
 
@@ -60,11 +59,11 @@ export default {
 
 				await newAuthor.save()
 
-				const token = await jwt.sign({
+				const token = await auth.sign({
 					id: newAuthor._id,
 					name: newAuthor.name,
 					email: newAuthor.email
-				}, 'SECRET')
+				})
 
 				return {
 					token,
@@ -74,6 +73,15 @@ export default {
 				throw new ApolloError("Unknown error", "400", {
 					message: e
 				})
+			}
+		},
+
+
+		async refreshToken(_, __, { auth }) {
+			const newToken = auth.refresh()
+
+			return {
+				token: newToken
 			}
 		}
 	}

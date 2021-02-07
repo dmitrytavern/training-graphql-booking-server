@@ -1,6 +1,10 @@
 import mongoose from 'mongoose'
-import { ApolloServer, PubSub } from "apollo-server"
-import jwt from 'jsonwebtoken'
+import express from 'express'
+import expressCookieParser from 'cookie-parser'
+import expressCors from 'cors'
+import { createServer } from 'http'
+import { ApolloServer, PubSub } from "apollo-server-express"
+import Auth from "./Auth"
 
 import typeDefs from './schema'
 import resolvers from './resolvers'
@@ -18,22 +22,24 @@ async function start() {
 
 		mongoose.set('debug', true)
 
+		const app = express()
+		app.use(expressCookieParser())
+		app.use(expressCors({
+			origin: 'http://localhost:3000',
+			credentials: true,
+		}))
+
 		const pubsub = new PubSub()
-		const server = new ApolloServer({
+		const apolloServer = new ApolloServer({
 			typeDefs,
 			resolvers,
-			context: ({ req }) => {
-				const token = req.headers.authorization || ''
-				const user = jwt.verify(token.split(' ')[1], 'SECRET', (err, decoded) => {
-					if (!err) {
-						return decoded
-					} else {
-						return {}
-					}
-				})
+			context: ({ req, res }) => {
+				const auth = new Auth(req, res)
+
+				res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
 
 				return {
-					user,
+					auth,
 					pubsub,
 					db: {
 						BookModel,
@@ -43,11 +49,13 @@ async function start() {
 			}
 		})
 
-		await server
-			.listen()
-			.then(({url, subscriptionsUrl}) => {
-			console.log('[APP]: Server ready on ' + url)
-			console.log('[APP]: Server subscriptions url: ' + subscriptionsUrl)
+		const httpServer = createServer(app)
+		apolloServer.applyMiddleware({ app })
+		apolloServer.installSubscriptionHandlers(httpServer)
+
+		httpServer.listen(4000, () => {
+			console.log('[APP]: Server ready on http://localhost:4000' + apolloServer.graphqlPath)
+			console.log('[APP]: Server subscriptions on ws://localhost:4000' + apolloServer.subscriptionsPath)
 		})
 	} catch (e) {
 		console.log('Server error', e)
@@ -55,7 +63,4 @@ async function start() {
 	}
 }
 
-start()
-	.then(() => {
-	console.log('[APP]: Application started')
-})
+start().then(() => {})

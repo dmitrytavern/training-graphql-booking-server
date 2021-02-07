@@ -13,11 +13,13 @@ export default {
 	},
 
 	Query: {
-		books: async (root, { ownerId }, { db, user }, info) => {
+		books: async (root, { ownerId }, { db, auth }, info) => {
 			const fields = getSelectedFields(info)
 			const filter = {}
 			if (ownerId) filter.owner = ownerId
-			if (user.id !== ownerId) filter.status = 'published'
+
+			const { data } = await auth.verify()
+			if (data.id !== ownerId) filter.status = 'published'
 
 			return db.BookModel.find(filter).select(fields).lean()
 		},

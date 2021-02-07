@@ -1,9 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 const useAuth = (apolloSetterToken) => {
 	const [autoAuth, setAutoAuth] = useState(true)
 	const [isAuth, setIsAuth] = useState(false)
 	const [user, setUser] = useState({})
+
+	const refresh = async () => {
+
+	}
 
 	const login = async ({ token, author }) => {
 		setIsAuth(true)
@@ -15,14 +19,6 @@ const useAuth = (apolloSetterToken) => {
 		setIsAuth(false)
 		setUser({})
 	}
-
-	// useEffect(() => {
-	// 	if (user && user.token) {
-	// 		login(user).then(() => setAutoAuth(true))
-	// 	} else {
-	// 		setAutoAuth(true)
-	// 	}
-	// }, [])
 
 	return {
 		autoAuth,
