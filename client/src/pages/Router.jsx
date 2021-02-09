@@ -8,7 +8,7 @@ import Author from "./Author"
 import AuthorBooks from "./AuthorBooks"
 
 const Router = () => {
-	const { isAuth, autoAuth } = useAuthContext()
+	const { isAuth, loading } = useAuthContext()
 
 	return (
 		<BrowserRouter>
@@ -33,7 +33,7 @@ const Router = () => {
 					</Route>
 					)}
 
-				{autoAuth && <Redirect to="/home"/>}
+				{!loading && <Redirect to="/home"/>}
 			</Switch>
 		</BrowserRouter>
 	)

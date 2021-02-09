@@ -21,8 +21,8 @@ const Author = () => {
 
 			<button onClick={() => refetch({ owner_id: user._id })}>Reload</button>
 
-			{data.books.map(book => (
-				<div>
+			{data.books.map((book, i) => (
+				<div key={i}>
 					<h3>{book.title}</h3>
 					<p>Status: {book.status}</p>
 				</div>

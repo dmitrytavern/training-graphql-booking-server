@@ -38,10 +38,6 @@ export default class Auth {
 				}
 			}
 
-			if (refreshToken !== null) {
-				const token = this.refresh(refreshToken)
-			}
-
 			return {
 				verify: false,
 				data: {}
@@ -51,14 +47,13 @@ export default class Auth {
 
 	async sign(payload) {
 		const refresh = await jwt.sign(payload, SECRET_REFRESH_KEY, {
-			expiresIn: 30
+			expiresIn: '7d'
 		})
 
 		const token = await jwt.sign(payload, SECRET_ACCESS_KEY, {
 			expiresIn: 10
 		})
 
-		console.log('Created new refresh token: ', refresh)
 		await this.res.cookie('refreshToken', refresh, {
 			httpOnly: true,
 			path: '/',
@@ -66,13 +61,14 @@ export default class Auth {
 			maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
 		})
 
+		console.log('Created new token: ', token)
+		console.log('Created new refresh token: ', refresh)
 		return token
 	}
 
 	async refresh(refreshToken) {
 		try {
 			const token = refreshToken || this.req.cookies.refreshToken || null
-			if (token === null) console.log('ERROR!!!!!!!!')
 
 			const payload = await jwt.verify(token, SECRET_REFRESH_KEY)
 
@@ -81,7 +77,18 @@ export default class Auth {
 			delete payload.nbf
 			delete payload.jti
 
-			return this.sign(payload)
+			return {
+				payload,
+				token: await this.sign(payload)
+			}
+		} catch (e) {
+			return new AuthenticationError('AuthenticationError')
+		}
+	}
+
+	async logout() {
+		try {
+			await this.res.clearCookie('refreshToken')
 		} catch (e) {
 			return new AuthenticationError('AuthenticationError')
 		}

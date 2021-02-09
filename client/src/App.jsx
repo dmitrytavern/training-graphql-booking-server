@@ -1,22 +1,15 @@
-import { AuthContext } from "./contexts/auth.context"
-import useAuth from "./hooks/auth.hook"
-
+import Apollo from "./providers/ApolloProvider"
+import AuthProvider from "./providers/AuthProvider"
 import Router from "./pages/Router"
 
-const App = ({ apolloSetterToken }) => {
-  const {
-    user,
-    autoAuth,
-    isAuth,
-    login,
-    logout
-  } = useAuth(apolloSetterToken)
-
+const App = () => {
   return (
-    <AuthContext.Provider value={{user, autoAuth, isAuth, login, logout}}>
-      <Router />
-    </AuthContext.Provider>
+    <Apollo>
+      <AuthProvider>
+        <Router />
+      </AuthProvider>
+    </Apollo>
   )
 }
 
-export default App;
+export default App

@@ -1,14 +1,12 @@
 import { useState } from 'react'
-import { useMutation } from "@apollo/client"
 import { useAuthContext } from "../../../contexts/auth.context"
 import { useHistory } from 'react-router-dom'
-import * as Queries from "../../../api/auth.api"
 
 const AuthLogin = () => {
 	const { login } = useAuthContext()
 	const history = useHistory()
-	const [queryLogin, { loading }] = useMutation(Queries.AUTH_LOGIN_MUTATION)
 
+	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState(false)
 	const [errorMessages, setErrorMessages] = useState('')
 	const [formData, setFormData] = useState({
@@ -29,13 +27,8 @@ const AuthLogin = () => {
 			return setErrorMessages('Blank password!')
 		}
 
-
-		queryLogin({
-			variables: {...formData}
-		})
-			.then((res) => {
-				login(res.data.login)
-			})
+		setLoading(true)
+		login({...formData})
 			.then(() => {
 				history.push('/author')
 			})
@@ -43,6 +36,9 @@ const AuthLogin = () => {
 				console.log(res)
 				setError(true)
 				setErrorMessages(res.graphQLErrors[0].extensions.message)
+			})
+			.finally(() => {
+				setLoading(false)
 			})
 	}
 

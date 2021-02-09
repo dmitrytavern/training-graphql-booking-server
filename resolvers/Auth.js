@@ -13,7 +13,6 @@ export default {
 					})
 				}
 
-
 				const passwordCompare = await bcrypt.compare(password, author.password)
 				if (!passwordCompare) {
 					return new ApolloError("Invalid field", '401', {
@@ -38,6 +37,26 @@ export default {
 			}
 		},
 
+		async autoLogin(_, __, { db, auth }) {
+			try {
+				let { token, payload } = await auth.refresh()
+
+				if (token) {
+					const author = await db.AuthorModel.findOne({
+						email: payload.email
+					})
+
+					return {
+						author,
+						token
+					}
+				}
+			} catch (e) {
+				throw new ApolloError("Unknown error", "400", {
+					message: e
+				})
+			}
+		},
 
 		async register(_, { name, email, password }, { db, auth }) {
 			try {
@@ -76,13 +95,16 @@ export default {
 			}
 		},
 
-
 		async refreshToken(_, __, { auth }) {
-			const newToken = auth.refresh()
+			const { token } = await auth.refresh()
 
 			return {
-				token: newToken
+				token
 			}
+		},
+
+		async logout(_, __, { auth }) {
+			await auth.logout()
 		}
 	}
 }
