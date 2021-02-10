@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { useAuthContext } from "../../../contexts/auth.context"
+import { useAuth } from "../../../contexts/auth.context"
 import { useHistory } from 'react-router-dom'
 
 const AuthLogin = () => {
-	const { login } = useAuthContext()
+	const { login } = useAuth()
 	const history = useHistory()
 
 	const [loading, setLoading] = useState(false)

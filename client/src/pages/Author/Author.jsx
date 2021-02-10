@@ -1,17 +1,13 @@
-import React, {useEffect} from 'react'
+import { Link } from 'react-router-dom'
 import { useQuery } from "@apollo/client"
-import * as Query from '../../api/book.api'
-import { useAuthContext } from "../../contexts/auth.context";
+import { useAuth } from "../../contexts/auth.context"
+import * as Requests from '../../api/book.api'
 
 const Author = () => {
-	const { user } = useAuthContext()
-	const {data, refetch, loading} = useQuery(Query.GET_BOOKS, {
-		variables: { owner_id: user._id }
+	const { user } = useAuth()
+	const { data, refetch, loading } = useQuery(Requests.GET_BOOKS, {
+		variables: { owner_id: user._id },
 	})
-
-	useEffect(() => {
-		console.log(data)
-	}, [data])
 
 	if (loading) return <p>Loading...</p>
 
@@ -19,9 +15,10 @@ const Author = () => {
 		<div>
 			<h1>Author</h1>
 
+			<button><Link to="/home">Back to home</Link></button>
 			<button onClick={() => refetch({ owner_id: user._id })}>Reload</button>
 
-			{data.books.map((book, i) => (
+			{data && data.books.map((book, i) => (
 				<div key={i}>
 					<h3>{book.title}</h3>
 					<p>Status: {book.status}</p>

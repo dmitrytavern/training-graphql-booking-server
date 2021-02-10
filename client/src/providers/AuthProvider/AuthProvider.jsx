@@ -7,15 +7,23 @@ const Auth = (props) => {
 		login: apolloLogin,
 		refresh: apolloRefresh,
 		logout: apolloLogout,
-		autoLogin: apolloAutoLogin
+		autoLogin: apolloAutoLogin,
+		register: apolloRegister
 	} = useApolloContext()
 
 	const [isAuth, setIsAuth] = useState(false)
 	const [loading, setLoading] = useState(true)
 	const [user, setUser] = useState({})
 
+	const register = async (variables) => {
+		const { author } = await apolloRegister(variables)
+
+		setIsAuth(true)
+		setUser(author)
+	}
+
 	const login = async (variables) => {
-		const author = await apolloLogin(variables)
+		const { author } = await apolloLogin(variables)
 
 		setIsAuth(true)
 		setUser(author)
@@ -32,24 +40,29 @@ const Auth = (props) => {
 		await apolloRefresh()
 	}
 
+
+	/**
+	 *  Auto login when page is loading
+	 * */
 	useEffect(() => {
 		apolloAutoLogin()
-			.then((author) => {
+			.then(({ author }) => {
 				setIsAuth(true)
 				setUser(author)
+				console.log('Auto login: Success')
 			})
-			.catch((res) => {
-				console.log(res)
-				console.log('Auto login is fail!')
+			.catch(() => {
+				console.log('Auto login: Fail')
 			})
 			.finally(() => {
 				setLoading(false)
 			})
+		// eslint-disable-next-line
 	}, [])
 
 
 	return (
-		<AuthProvider value={{user, isAuth, loading, login, logout, refresh}}>
+		<AuthProvider value={{user, isAuth, loading, register, login, logout, refresh}}>
 			{props.children}
 		</AuthProvider>
 	)

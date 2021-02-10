@@ -5,6 +5,7 @@ export const AuthContext = createContext({
 	user: {},
 	isAuth: false,
 	loading: false,
+	register: asyncNoop,
 	login: asyncNoop,
 	logout: asyncNoop,
 	refresh: asyncNoop,
@@ -12,6 +13,6 @@ export const AuthContext = createContext({
 
 export const AuthProvider = AuthContext.Provider
 
-export const useAuthContext = () => {
+export const useAuth = () => {
 	return useContext(AuthContext)
 }

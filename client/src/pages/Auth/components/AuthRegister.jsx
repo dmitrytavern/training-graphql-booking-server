@@ -1,14 +1,12 @@
 import { useState } from 'react'
-import { useMutation } from "@apollo/client"
-import { useAuthContext } from "../../../contexts/auth.context"
+import { useAuth } from "../../../contexts/auth.context"
 import { useHistory } from "react-router-dom"
-import * as Queries from "../../../api/auth.api"
 
 const AuthRegister = () => {
-	const { login } = useAuthContext()
+	const { register } = useAuth()
 	const history = useHistory()
-	const [queryRegister, { loading }] = useMutation(Queries.AUTH_REGISTRATION_MUTATION)
 
+	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState('')
 	const [errorMessages, setErrorMessages] = useState('')
 	const [formData, setFormData] = useState({
@@ -37,16 +35,13 @@ const AuthRegister = () => {
 		}
 
 
-		queryRegister({
-			variables: {...formData}
-		})
-			.then((res) => {
-				login(res.data.register)
-			})
+		setLoading(true)
+		register({...formData})
 			.then(() => {
 				history.push('/author')
 			})
 			.catch((res) => {
+				setLoading(false)
 				setError(true)
 				setErrorMessages(res.graphQLErrors[0].extensions.message)
 			})

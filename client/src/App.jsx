@@ -1,14 +1,13 @@
-import Apollo from "./providers/ApolloProvider"
-import AuthProvider from "./providers/AuthProvider"
 import Router from "./pages/Router"
+import { useAuth } from "./contexts/auth.context";
 
 const App = () => {
+  const { loading } = useAuth()
+
+  if (loading) return <p>Loading...</p>
+
   return (
-    <Apollo>
-      <AuthProvider>
-        <Router />
-      </AuthProvider>
-    </Apollo>
+    <Router />
   )
 }
 

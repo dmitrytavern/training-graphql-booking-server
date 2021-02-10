@@ -1,3 +1,4 @@
+import { useHistory } from 'react-router-dom'
 import { ApolloLink } from "@apollo/client"
 import jwtDecode from "jwt-decode"
 import * as Requests from "../../api/auth.api"
@@ -6,6 +7,31 @@ let token = null
 let startGettingNewToken = false
 
 const useApolloAuth = (client) => {
+	const history = useHistory()
+
+	/**
+	 *  Register request
+	 *  Sending data to server, where we create new user
+	 *  and return token with user data
+	 * */
+	const register = async (variables) => {
+		try {
+			const { data } = await client.mutate({
+				mutation: Requests.AUTH_REGISTRATION_MUTATION,
+				variables
+			})
+
+			const { token: newToken, ...other } = data.register
+
+			token = newToken
+
+			return other
+		} catch (e) {
+			console.error(e)
+			throw new Error('[Auth]: Error logout')
+		}
+	}
+
 
 	/**
 	 *  Login request
@@ -13,16 +39,21 @@ const useApolloAuth = (client) => {
 	 *  auth token and user data
 	 * */
 	const login = async (variables) => {
-		const { data } = await client.mutate({
-			mutation: Requests.AUTH_LOGIN_MUTATION,
-			variables
-		})
+		try {
+			const {data} = await client.mutate({
+				mutation: Requests.AUTH_LOGIN_MUTATION,
+				variables
+			})
 
-		const { author, token: newToken } = data.login
+			const { token: newToken, ...other } = data.login
 
-		token = newToken
+			token = newToken
 
-		return author
+			return other
+		} catch (e) {
+			console.error(e)
+			throw new Error('[Auth]: Error login')
+		}
 	}
 
 
@@ -32,15 +63,19 @@ const useApolloAuth = (client) => {
 	 *  is valid
 	 * */
 	const autoLogin = async () => {
-		const { data } = await client.mutate({
-			mutation: Requests.AUTH_AUTO_LOGIN_MUTATION
-		})
+		try {
+			const { data } = await client.mutate({
+				mutation: Requests.AUTH_AUTO_LOGIN_MUTATION
+			})
 
-		const { author, token: newToken } = data.autoLogin
+			const { token: newToken, ...other } = data.autoLogin
 
-		token = newToken
+			token = newToken
 
-		return author
+			return other
+		} catch (e) {
+			throw new Error('[Auth]: Error login with refresh token')
+		}
 	}
 
 
@@ -49,11 +84,16 @@ const useApolloAuth = (client) => {
 	 *  Sending request on refresh auth token
 	 * */
 	const refresh = async () => {
-		const { data } = await client.mutate({
-			mutation: Requests.AUTH_REFRESH_TOKEN_MUTATION
-		})
+		try {
+			const {data} = await client.mutate({
+				mutation: Requests.AUTH_REFRESH_TOKEN_MUTATION
+			})
 
-		token = data.refreshToken.token
+			token = data.refreshToken.token
+		} catch (e) {
+			console.error(e)
+			throw new Error('[Auth]: Error refresh token')
+		}
 	}
 
 
@@ -63,9 +103,14 @@ const useApolloAuth = (client) => {
 	 *  refresh tokens from database end close session
 	 * */
 	const logout = async () => {
-		await client.mutate({
-			mutation: Requests.AUTH_LOGOUT_MUTATION
-		})
+		try {
+			await client.mutate({
+				mutation: Requests.AUTH_LOGOUT_MUTATION
+			})
+		} catch (e) {
+			console.error(e)
+			throw new Error('[Auth]: Error logout')
+		}
 	}
 
 
@@ -73,25 +118,27 @@ const useApolloAuth = (client) => {
 	 *  Checks tokens
 	 *  Checks expires of access token. If date > exp time
 	 *  we sending request on refresh token. If happens error with
-	 *  auth we redirect user on auth page
+	 *  auth we redirect user on auth page.
+	 *
+	 *  If something happens( invalid token, error from server )
+	 *  we redirect user on auth page
 	 * */
 	const refreshChecking = async () => {
-		if (token !== null) {
-			const payload = await jwtDecode(token)
+		try {
+			if (token !== null) {
+				const { exp } = await jwtDecode(token)
 
-			if (Date.now() >= (payload.exp * 1000) - 5 && !startGettingNewToken) {
-				try {
-					startGettingNewToken = true
+				if (Date.now() >= (exp * 1000) - 5 && !startGettingNewToken) {
 
-					await refresh().then(() => {
-						startGettingNewToken = false
-					})
-				} catch (e) {
-					window.location = '/auth'
+						startGettingNewToken = true
 
-					throw 'Redirect'
+						await refresh().then(() => {
+							startGettingNewToken = false
+						})
 				}
 			}
+		} catch (e) {
+			history.push('/auth/login')
 		}
 	}
 
@@ -100,21 +147,22 @@ const useApolloAuth = (client) => {
 	 *  Create apollo middleware for setting headers for
 	 *  authorization users
 	 * */
-	const middleware = new ApolloLink((operation, forward) => {
-		return refreshChecking().then(() => {
-			operation.setContext({
-				headers: {
-					'Access-Control-Allow-Origin': 'http://localhost:4000',
-					authorization: token ? `Bearer ${token}` : '',
-				}
-			})
+	const middleware = new ApolloLink(async (operation, forward) => {
+		await refreshChecking()
 
-			return forward(operation)
+		operation.setContext({
+			headers: {
+				'Access-Control-Allow-Origin': 'http://localhost:4000',
+				authorization: token ? `Bearer ${token}` : '',
+			}
 		})
+
+		return forward(operation)
 	})
 
 	return {
 		middleware,
+		register,
 		login,
 		autoLogin,
 		logout,

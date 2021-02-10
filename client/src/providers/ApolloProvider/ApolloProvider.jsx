@@ -4,7 +4,7 @@ import useApolloAuth from './authMiddleware'
 
 let client
 const Apollo = (props) => {
-	const { middleware: authMiddleware, login, autoLogin, refresh, logout } = useApolloAuth(client)
+	const { middleware: authMiddleware, register, login, autoLogin, refresh, logout } = useApolloAuth(client)
 
 	const httpLink = new HttpLink({
 		uri: "http://localhost:4000/graphql",
@@ -21,7 +21,7 @@ const Apollo = (props) => {
 
 	return (
 		<ApolloProvider client={client}>
-			<ApolloContext.Provider value={{login, autoLogin, logout, refresh}}>
+			<ApolloContext.Provider value={{register, login, autoLogin, logout, refresh}}>
 				{props.children}
 			</ApolloContext.Provider>
 		</ApolloProvider>

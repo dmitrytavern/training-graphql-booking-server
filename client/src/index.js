@@ -4,9 +4,19 @@ import './index.css'
 import App from './App'
 import reportWebVitals from './reportWebVitals'
 
+import { BrowserRouter } from "react-router-dom"
+import Apollo from "./providers/ApolloProvider"
+import AuthProvider from "./providers/AuthProvider"
+
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <Apollo>
+        <AuthProvider>
+          <App/>
+        </AuthProvider>
+      </Apollo>
+    </BrowserRouter>
   </React.StrictMode>,
   document.getElementById('root')
 )

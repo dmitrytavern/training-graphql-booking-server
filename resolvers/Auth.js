@@ -41,15 +41,17 @@ export default {
 			try {
 				let { token, payload } = await auth.refresh()
 
-				if (token) {
-					const author = await db.AuthorModel.findOne({
-						email: payload.email
-					})
+				if (!token) {
+					return new ApolloError("Error with token", "401")
+				}
 
-					return {
-						author,
-						token
-					}
+				const author = await db.AuthorModel.findOne({
+					email: payload.email
+				})
+
+				return {
+					author,
+					token
 				}
 			} catch (e) {
 				throw new ApolloError("Unknown error", "400", {
