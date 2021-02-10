@@ -1,6 +1,6 @@
 import { AuthProvider } from "../../contexts/auth.context"
 import { useApolloContext } from "../../contexts/apollo.context"
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 const Auth = (props) => {
 	const {
@@ -15,50 +15,76 @@ const Auth = (props) => {
 	const [loading, setLoading] = useState(true)
 	const [user, setUser] = useState({})
 
-	const register = async (variables) => {
-		const { author } = await apolloRegister(variables)
-
+	const setLoggedAuthor = (author) => {
 		setIsAuth(true)
 		setUser(author)
+		localStorage.setItem('logged', 'true')
 	}
 
-	const login = async (variables) => {
-		const { author } = await apolloLogin(variables)
-
-		setIsAuth(true)
-		setUser(author)
-	}
-
-	const logout = async () => {
-		await apolloLogout()
-
+	const setLogoutAuthor = () => {
 		setIsAuth(false)
 		setUser({})
+		localStorage.setItem('logged', 'false')
 	}
 
-	const refresh = async () => {
+
+	const register = useCallback(async (variables) => {
+		const { author } = await apolloRegister(variables)
+
+		setLoggedAuthor(author)
+	}, [apolloRegister])
+
+
+	const login = useCallback(async (variables) => {
+		const { author } = await apolloLogin(variables)
+
+		setLoggedAuthor(author)
+	}, [apolloLogin])
+
+
+	const authLogin = useCallback(async () => {
+		try {
+			const { author } = await apolloAutoLogin()
+
+			setLoggedAuthor(author)
+			console.log('Auto login: Success')
+		} catch (e) {
+			console.log('Auto login: Fail')
+		}
+
+		setLoading(false)
+	}, [apolloAutoLogin])
+
+
+	const logout = useCallback(async () => {
+		await apolloLogout()
+
+		setLogoutAuthor()
+	}, [apolloLogout])
+
+
+	const refresh = useCallback(async () => {
 		await apolloRefresh()
-	}
+	}, [apolloRefresh])
 
 
 	/**
 	 *  Auto login when page is loading
 	 * */
 	useEffect(() => {
-		apolloAutoLogin()
-			.then(({ author }) => {
-				setIsAuth(true)
-				setUser(author)
-				console.log('Auto login: Success')
-			})
-			.catch(() => {
-				console.log('Auto login: Fail')
-			})
-			.finally(() => {
-				setLoading(false)
-			})
-		// eslint-disable-next-line
-	}, [])
+		const onStorage = () => {
+			const logged = localStorage.getItem('logged') || ''
+			if (logged === 'false') setLogoutAuthor()
+			if (logged === 'true') authLogin().then()
+		}
+
+		window.addEventListener('storage', onStorage)
+		return () => { window.removeEventListener('storage', onStorage) }
+	}, [authLogin])
+
+	useEffect(() => {
+		authLogin().then()
+	}, [authLogin])
 
 
 	return (
