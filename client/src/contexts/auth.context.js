@@ -9,6 +9,7 @@ export const AuthContext = createContext({
 	login: asyncNoop,
 	logout: asyncNoop,
 	refresh: asyncNoop,
+	remove: asyncNoop
 })
 
 export const useAuth = () => {

@@ -4,7 +4,7 @@ import { useAuth } from "../../contexts/auth.context"
 import * as Requests from '../../api/book.api'
 
 const Author = () => {
-	const { user } = useAuth()
+	const { user, remove } = useAuth()
 	const { data, refetch, loading } = useQuery(Requests.GET_PRIVATE_BOOKS, {
 		variables: { ownerId: user._id },
 	})
@@ -17,6 +17,7 @@ const Author = () => {
 
 			<button><Link to="/home">Back to home</Link></button>
 			<button onClick={() => refetch({ ownerId: user._id })}>Reload</button>
+			<button onClick={() => remove()}>Remove Account</button>
 
 			{data && data.privateBooks.map((book, i) => (
 				<div key={i}>

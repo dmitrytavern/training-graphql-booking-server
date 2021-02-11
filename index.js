@@ -9,7 +9,8 @@ import Auth from "./Auth"
 import typeDefs from './schema'
 import resolvers from './resolvers'
 
-import RefreshToken from "./models/RefreshToken"
+import UserModel from './models/User'
+import RefreshTokenModel from "./models/RefreshToken"
 import BookModel from './models/Books'
 import AuthorModel from './models/Author'
 
@@ -31,12 +32,12 @@ async function start() {
 		}))
 
 		const pubsub = new PubSub()
-		const auth = new Auth()
+		const auth = new Auth(RefreshTokenModel)
 		const apolloServer = new ApolloServer({
 			typeDefs,
 			resolvers,
 			context: ({ req, res }) => {
-				auth.setData(req, res, RefreshToken)
+				auth.setData(req, res)
 
 				res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
 
@@ -44,9 +45,10 @@ async function start() {
 					auth,
 					pubsub,
 					db: {
+						UserModel,
 						BookModel,
 						AuthorModel,
-						RefreshToken
+						RefreshTokenModel
 					}
 				}
 			}

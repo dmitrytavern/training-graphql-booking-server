@@ -5,12 +5,59 @@ import jwtDecode from "jwt-decode"
 import createApolloClient from "../ApolloProvider/createApolloClient"
 import * as Requests from "../../api/auth.api"
 
-let client = createApolloClient()
 let token = null
-let startGettingNewToken = false
+let sendGetRefreshTokenRequest = false
+const checkingAccessExpired = async () => {
+	const { exp } = await jwtDecode(token)
+	return (Date.now() >= (exp * 1000) - 5 && !sendGetRefreshTokenRequest)
+}
 
 const useApolloAuth = () => {
 	const history = useHistory()
+
+	const requestRefreshToken = async (client) => {
+		sendGetRefreshTokenRequest = true
+
+		try {
+			const { data } = await client.mutate({
+				mutation: Requests.AUTH_REFRESH_TOKEN_MUTATION
+			})
+
+			token = data.refreshToken.token
+
+			sendGetRefreshTokenRequest = false
+		} catch (e) {
+			sendGetRefreshTokenRequest = false
+			console.error(e)
+			throw new Error('[Auth]: Error refresh token')
+		}
+	}
+
+	const client = createApolloClient([
+		new ApolloLink(async (operation, forward) => {
+			if (token !== null) {
+				const expired = await checkingAccessExpired()
+
+				if (expired) {
+					await requestRefreshToken(client)
+						.catch(() => {
+							history.push('/auth/logout', {
+								makeRequest: false
+							})
+						})
+				}
+			}
+
+			operation.setContext({
+				headers: {
+					'Access-Control-Allow-Origin': 'http://localhost:4000',
+					authorization: token ? `Bearer ${token}` : '',
+				}
+			})
+
+			return forward(operation)
+		})
+	])
 
 	/**
 	 *  Register request
@@ -33,7 +80,7 @@ const useApolloAuth = () => {
 			console.error(e)
 			throw new Error('[Auth]: Error logout')
 		}
-	}, [])
+	}, [client])
 
 
 	/**
@@ -57,7 +104,7 @@ const useApolloAuth = () => {
 			console.error(e)
 			throw new Error('[Auth]: Error login')
 		}
-	}, [])
+	}, [client])
 
 
 	/**
@@ -79,20 +126,16 @@ const useApolloAuth = () => {
 		} catch (e) {
 			throw new Error('[Auth]: Error login with refresh token')
 		}
-	}, [])
+	}, [client])
 
 
 	/**
 	 *  Refresh request
-	 *  Sending request on refresh auth token
+	 *  Sending refresh auth token request
 	 * */
 	const refresh = useCallback(async () => {
 		try {
-			const { data } = await client.mutate({
-				mutation: Requests.AUTH_REFRESH_TOKEN_MUTATION
-			})
-
-			token = data.refreshToken.token
+			await requestRefreshToken(client)
 		} catch (e) {
 			console.error(e)
 			throw new Error('[Auth]: Error refresh token')
@@ -102,7 +145,7 @@ const useApolloAuth = () => {
 
 	/**
 	 *  Logout
-	 *  Sending request on logout user. Deleting
+	 *  Sending logout user request. Deleting
 	 *  refresh tokens from database end close session
 	 * */
 	const logout = useCallback(async () => {
@@ -114,7 +157,23 @@ const useApolloAuth = () => {
 			console.error(e)
 			throw new Error('[Auth]: Error logout')
 		}
-	}, [])
+	}, [client])
+
+
+	/**
+	 *  Remove account
+	 *  Sending remove user request
+	 * */
+	const remove = useCallback(async () => {
+		try {
+			await client.mutate({
+				mutation: Requests.AUTH_REMOVE_ACCOUNT_MUTATION
+			})
+		} catch (e) {
+			console.error(e)
+			throw new Error('[Auth]: Error remove')
+		}
+	}, [client])
 
 
 	/**
@@ -129,20 +188,15 @@ const useApolloAuth = () => {
 	const refreshChecking = useCallback(async () => {
 		try {
 			if (token !== null) {
-				const { exp } = await jwtDecode(token)
+				const expired = await checkingAccessExpired()
 
-				if (Date.now() >= (exp * 1000) - 5 && !startGettingNewToken) {
-
-					startGettingNewToken = true
-
+				if (expired) {
 					await refresh()
 						.catch(() => {
 							history.push('/auth/logout', {
 								makeRequest: false
 							})
 						})
-
-					startGettingNewToken = false
 				}
 			}
 		} catch (e) {
@@ -176,7 +230,8 @@ const useApolloAuth = () => {
 			login,
 			autoLogin,
 			logout,
-			refresh
+			refresh,
+			remove
 		}
 	}
 }

@@ -13,13 +13,15 @@ export const types = `
 export const queries = ``
 
 export const mutations = `
+	register(name: String, email: String, password: String): AuthCallbackMutation
+
 	login(email: String, password: String): AuthCallbackMutation
 
 	autoLogin(void: String): AuthCallbackMutation
 
-	register(name: String, email: String, password: String): AuthCallbackMutation
-
 	refreshToken(oldToken: String): AuthRefreshToken
 
 	logout(void: String): Boolean
+
+	remove(void: String): Boolean
 `

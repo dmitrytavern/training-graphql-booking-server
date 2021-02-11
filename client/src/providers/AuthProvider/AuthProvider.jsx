@@ -9,7 +9,8 @@ const Auth = (props) => {
 			refresh: apolloRefresh,
 			logout: apolloLogout,
 			autoLogin: apolloAutoLogin,
-			register: apolloRegister
+			register: apolloRegister,
+			remove: apolloRemove
 		}
 	} = useApolloAuth()
 
@@ -70,6 +71,12 @@ const Auth = (props) => {
 	}, [apolloRefresh])
 
 
+	const remove = useCallback(async () => {
+		await apolloRemove()
+		await apolloLogout()
+		setLogoutAuthor()
+	}, [apolloRemove, apolloLogout])
+
 
 	/**
 	 *  Auto login when page is loading
@@ -85,11 +92,12 @@ const Auth = (props) => {
 
 		window.addEventListener('storage', onStorage)
 		return () => { window.removeEventListener('storage', onStorage) }
-	}, [authLogin])
+		// eslint-disable-next-line
+	}, [])
 
 
 	return (
-		<AuthContext.Provider value={{user, isAuth, loading, register, login, logout, refresh}}>
+		<AuthContext.Provider value={{user, isAuth, loading, register, login, logout, refresh, remove}}>
 			{props.children}
 		</AuthContext.Provider>
 	)

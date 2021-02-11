@@ -52,3 +52,9 @@ export const AUTH_LOGOUT_MUTATION = gql`
 		logout
 	}
 `
+
+export const AUTH_REMOVE_ACCOUNT_MUTATION = gql`
+	mutation RemoveAccount {
+		remove
+	}
+`
