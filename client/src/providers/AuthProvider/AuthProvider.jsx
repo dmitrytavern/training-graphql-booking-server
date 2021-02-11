@@ -1,15 +1,17 @@
-import { AuthProvider } from "../../contexts/auth.context"
-import { useApolloContext } from "../../contexts/apollo.context"
+import { AuthContext } from "../../contexts/auth.context"
 import { useState, useEffect, useCallback } from 'react'
+import useApolloAuth from "../hooks/provider.auth.hook"
 
 const Auth = (props) => {
 	const {
-		login: apolloLogin,
-		refresh: apolloRefresh,
-		logout: apolloLogout,
-		autoLogin: apolloAutoLogin,
-		register: apolloRegister
-	} = useApolloContext()
+		actions: {
+			login: apolloLogin,
+			refresh: apolloRefresh,
+			logout: apolloLogout,
+			autoLogin: apolloAutoLogin,
+			register: apolloRegister
+		}
+	} = useApolloAuth()
 
 	const [isAuth, setIsAuth] = useState(false)
 	const [loading, setLoading] = useState(true)
@@ -68,10 +70,13 @@ const Auth = (props) => {
 	}, [apolloRefresh])
 
 
+
 	/**
 	 *  Auto login when page is loading
 	 * */
 	useEffect(() => {
+		authLogin().then()
+
 		const onStorage = () => {
 			const logged = localStorage.getItem('logged') || ''
 			if (logged === 'false') setLogoutAuthor()
@@ -82,15 +87,11 @@ const Auth = (props) => {
 		return () => { window.removeEventListener('storage', onStorage) }
 	}, [authLogin])
 
-	useEffect(() => {
-		authLogin().then()
-	}, [authLogin])
-
 
 	return (
-		<AuthProvider value={{user, isAuth, loading, register, login, logout, refresh}}>
+		<AuthContext.Provider value={{user, isAuth, loading, register, login, logout, refresh}}>
 			{props.children}
-		</AuthProvider>
+		</AuthContext.Provider>
 	)
 }
 

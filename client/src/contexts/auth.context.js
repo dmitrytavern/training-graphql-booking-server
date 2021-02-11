@@ -11,8 +11,6 @@ export const AuthContext = createContext({
 	refresh: asyncNoop,
 })
 
-export const AuthProvider = AuthContext.Provider
-
 export const useAuth = () => {
 	return useContext(AuthContext)
 }
