@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 
 const COOKIE_REFRESH_TOKEN_NAME = 'refreshToken'
 const EXPIRES_IN_REFRESH_TOKEN = 1000 * 60 * 60 * 24 * 7 // 7 days
-const EXPIRES_IN_ACCESS_TOKEN = 10
+const EXPIRES_IN_ACCESS_TOKEN = 60 // 900 - 15 min
 const SECRET_ACCESS_KEY = 'SECRET'
 const SECRET_REFRESH_KEY = 'REFRESH'
 
@@ -134,7 +134,12 @@ export default class Auth {
 				})
 			}
 
-			await this.res.clearCookie(COOKIE_REFRESH_TOKEN_NAME)
+			await this.res.cookie(COOKIE_REFRESH_TOKEN_NAME, '', {
+				httpOnly: true,
+				path: '/graphql',
+				sameSite: true,
+				maxAge: 0
+			})
 		} catch (e) {
 			throw new AuthenticationError('AuthenticationError')
 		}
@@ -253,7 +258,7 @@ export default class Auth {
 		try {
 			await this.res.cookie(COOKIE_REFRESH_TOKEN_NAME, refreshToken, {
 				httpOnly: true,
-				path: '/',
+				path: '/graphql',
 				sameSite: true,
 				maxAge: EXPIRES_IN_REFRESH_TOKEN
 			})
