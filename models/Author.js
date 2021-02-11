@@ -16,8 +16,8 @@ const schema = new Schema({
 	},
 	books: [{
 		type: Types.ObjectId,
-		ref: 'Book'
+		ref: 'book'
 	}]
 })
 
-export default model('Author', schema)
+export default model('author', schema)

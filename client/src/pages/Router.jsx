@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/auth.context"
 
 import Home from './Home'
 import Auth from "./Auth"
+import AuthLogout from "./Auth/components/AuthLogout"
 import Author from "./Author"
 import AuthorBooks from "./AuthorBooks"
 
@@ -17,6 +18,12 @@ const Router = () => {
 			{!isAuth && (
 				<Route path="/auth">
 					<Auth/>
+				</Route>
+			)}
+
+			{isAuth && (
+				<Route path="/auth/logout">
+					<AuthLogout/>
 				</Route>
 			)}
 

@@ -5,8 +5,8 @@ import * as Requests from '../../api/book.api'
 
 const Author = () => {
 	const { user } = useAuth()
-	const { data, refetch, loading } = useQuery(Requests.GET_BOOKS, {
-		variables: { owner_id: user._id },
+	const { data, refetch, loading } = useQuery(Requests.GET_PRIVATE_BOOKS, {
+		variables: { ownerId: user._id },
 	})
 
 	if (loading) return <p>Loading...</p>
@@ -16,9 +16,9 @@ const Author = () => {
 			<h1>Author</h1>
 
 			<button><Link to="/home">Back to home</Link></button>
-			<button onClick={() => refetch({ owner_id: user._id })}>Reload</button>
+			<button onClick={() => refetch({ ownerId: user._id })}>Reload</button>
 
-			{data && data.books.map((book, i) => (
+			{data && data.privateBooks.map((book, i) => (
 				<div key={i}>
 					<h3>{book.title}</h3>
 					<p>Status: {book.status}</p>

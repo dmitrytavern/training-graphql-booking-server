@@ -58,8 +58,8 @@ const Auth = (props) => {
 	}, [apolloAutoLogin])
 
 
-	const logout = useCallback(async () => {
-		await apolloLogout()
+	const logout = useCallback(async (makeRequest = true) => {
+		if (makeRequest) await apolloLogout()
 
 		setLogoutAuthor()
 	}, [apolloLogout])

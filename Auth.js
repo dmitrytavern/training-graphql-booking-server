@@ -7,7 +7,8 @@ const SECRET_REFRESH_KEY = 'REFRESH'
 export default class Auth {
 
 	// Request from server for getting authorization header
-	constructor(request, response) {
+	constructor(request, response, model) {
+		this.model = model
 		this.req = request
 		this.res = response
 
@@ -20,45 +21,68 @@ export default class Auth {
 	}
 
 	async verify() {
-		const refreshToken = this.req.cookies.refreshToken || null
+		try {
+			const refreshToken = this.req.cookies.refreshToken || null
 
-		if (this.token === null && refreshToken === null) {
-			// ERROR AUTH
-			return {
-				verify: false,
-				data: {}
+			if (this.token === null && refreshToken === null) {
+				return new AuthenticationError('AuthenticationError')
 			}
+
+			return await jwt.verify(this.token, SECRET_ACCESS_KEY)
+		} catch (e) {
+			throw new AuthenticationError('AuthenticationError')
 		}
-
-		return await jwt.verify(this.token, SECRET_ACCESS_KEY, (err, decoded) => {
-			if (!err) {
-				return {
-					verify: true,
-					data: decoded
-				}
-			}
-
-			return {
-				verify: false,
-				data: {}
-			}
-		})
 	}
 
 	async sign(payload) {
+		const oldRefreshToken = this.req.cookies.refreshToken || null
+		const expiresInDate = 1000 * 60 * 60 * 24 * 7 // 7 days
+
 		const refresh = await jwt.sign(payload, SECRET_REFRESH_KEY, {
-			expiresIn: '7d'
+			expiresIn: expiresInDate
 		})
 
 		const token = await jwt.sign(payload, SECRET_ACCESS_KEY, {
 			expiresIn: 10
 		})
 
+		if (oldRefreshToken === null) {
+			const refreshToken = new this.model({
+				userId: payload.id,
+				refreshToken: refresh,
+				expiresIn: expiresInDate
+			})
+
+			await refreshToken.save()
+			console.log('Create refresh token in database')
+		} else {
+			try {
+				await jwt.verify(oldRefreshToken, SECRET_REFRESH_KEY)
+
+				const data = await this.model.findOneAndUpdate({
+					refreshToken: oldRefreshToken
+				}, {
+					userId: payload.id,
+					refreshToken: refresh,
+					expiresIn: expiresInDate
+				})
+
+				if (data === null) {
+					await this.logout()
+					return new Error('Token not found!')
+				}
+
+				console.log('Update refresh token in database')
+			} catch (e) {
+				await this.logout()
+			}
+		}
+
 		await this.res.cookie('refreshToken', refresh, {
 			httpOnly: true,
 			path: '/',
 			sameSite: true,
-			maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+			maxAge: expiresInDate
 		})
 
 		console.log('Created new token: ', token)
@@ -69,6 +93,12 @@ export default class Auth {
 	async refresh(refreshToken) {
 		try {
 			const token = refreshToken || this.req.cookies.refreshToken || null
+
+			if (token === null) return new AuthenticationError('AuthenticationError')
+
+			const dbToken = await this.model.find({ refreshToken: token })
+
+			if (dbToken === null)  return new AuthenticationError('AuthenticationError')
 
 			const payload = await jwt.verify(token, SECRET_REFRESH_KEY)
 
@@ -82,15 +112,25 @@ export default class Auth {
 				token: await this.sign(payload)
 			}
 		} catch (e) {
-			return new AuthenticationError('AuthenticationError')
+			throw new AuthenticationError('AuthenticationError')
 		}
 	}
 
 	async logout() {
 		try {
+			const oldRefreshToken = this.req.cookies.refreshToken || null
+
+			if (oldRefreshToken) {
+				await this.model.findOneAndDelete({
+					refreshToken: oldRefreshToken
+				})
+			}
+
 			await this.res.clearCookie('refreshToken')
+
+			console.log('Delete refresh token from database and cookie')
 		} catch (e) {
-			return new AuthenticationError('AuthenticationError')
+			throw new AuthenticationError('AuthenticationError')
 		}
 	}
 }

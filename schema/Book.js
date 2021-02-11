@@ -9,7 +9,8 @@ export const types = `
 `
 
 export const queries = `
-	books(ownerId: String): [Book]
+	privateBooks(ownerId: String!): [Book]
+	books: [Book]
 	book(id: String): Book
 `
 

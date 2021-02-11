@@ -9,6 +9,7 @@ import Auth from "./Auth"
 import typeDefs from './schema'
 import resolvers from './resolvers'
 
+import RefreshToken from "./models/RefreshToken"
 import BookModel from './models/Books'
 import AuthorModel from './models/Author'
 
@@ -34,7 +35,7 @@ async function start() {
 			typeDefs,
 			resolvers,
 			context: ({ req, res }) => {
-				const auth = new Auth(req, res)
+				const auth = new Auth(req, res, RefreshToken)
 
 				res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
 
@@ -43,7 +44,8 @@ async function start() {
 					pubsub,
 					db: {
 						BookModel,
-						AuthorModel
+						AuthorModel,
+						RefreshToken
 					}
 				}
 			}

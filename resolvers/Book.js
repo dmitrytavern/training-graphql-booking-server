@@ -13,15 +13,26 @@ export default {
 	},
 
 	Query: {
-		books: async (root, { ownerId }, { db, auth }, info) => {
+		privateBooks: async (root, { ownerId }, { db, auth }, info) => {
+			await auth.verify()
+
 			const fields = getSelectedFields(info)
-			const filter = {}
-			if (ownerId) filter.owner = ownerId
 
-			const { data } = await auth.verify()
-			if (data.id !== ownerId) filter.status = 'published'
+			return db.BookModel
+				.find({
+					owner: ownerId
+				})
+				.select(fields)
+				.lean()
+		},
 
-			return db.BookModel.find(filter).select(fields).lean()
+		books: async (root, _, { db }, info) => {
+			const fields = getSelectedFields(info)
+
+			return db.BookModel
+				.find({ status: 'published' })
+				.select(fields)
+				.lean()
 		},
 
 		book: async (root, { id }, { db }, info) => {

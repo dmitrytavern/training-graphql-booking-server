@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client'
 
-export const GET_BOOKS = gql`
-	query GetBooks($owner_id: String) {
-		books(ownerId: $owner_id) {
+export const GET_PRIVATE_BOOKS = gql`
+	query GetPrivateBooks($ownerId: String!) {
+		privateBooks(ownerId: $ownerId) {
 			title,
 			status
 		}

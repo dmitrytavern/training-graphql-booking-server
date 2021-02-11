@@ -135,13 +135,18 @@ const useApolloAuth = () => {
 
 					startGettingNewToken = true
 
-					await refresh().then(() => {
-						startGettingNewToken = false
-					})
+					await refresh()
+						.catch(() => {
+							history.push('/auth/logout', {
+								makeRequest: false
+							})
+						})
+
+					startGettingNewToken = false
 				}
 			}
 		} catch (e) {
-			history.push('/auth/login')
+			history.push('/auth')
 		}
 	}, [history, refresh])
 
