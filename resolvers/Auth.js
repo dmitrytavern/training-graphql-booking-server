@@ -20,7 +20,7 @@ export default {
 					})
 				}
 
-				const token = await auth.sign({
+				const { token } = await auth.sign({
 					id: author._id,
 					name: author.name,
 					email: author.email
@@ -80,7 +80,7 @@ export default {
 
 				await newAuthor.save()
 
-				const token = await auth.sign({
+				const { token } = await auth.sign({
 					id: newAuthor._id,
 					name: newAuthor.name,
 					email: newAuthor.email

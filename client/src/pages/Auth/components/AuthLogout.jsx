@@ -9,7 +9,7 @@ const AuthLogout = () => {
 	useEffect(() => {
 		logout(history.location.state.makeRequest)
 		history.push('/auth')
-	}, [])
+	}, [logout, history])
 
 	return null
 }

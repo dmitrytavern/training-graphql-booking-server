@@ -14,8 +14,8 @@ const useApolloAuth = () => {
 
 	/**
 	 *  Register request
-	 *  Sending data to server, where we create new user
-	 *  and return token with user data
+	 *  Sending data to server and create new user
+	 *  and returns token with user data
 	 * */
 	const register = useCallback(async (variables) => {
 		try {
@@ -120,11 +120,11 @@ const useApolloAuth = () => {
 	/**
 	 *  Checks tokens
 	 *  Checks expires of access token. If date > exp time
-	 *  we sending request on refresh token. If happens error with
-	 *  auth we redirect user on auth page.
+	 *  function sending request on refresh token. If happens error with
+	 *  auth function redirect user on auth page.
 	 *
 	 *  If something happens( invalid token, error from server )
-	 *  we redirect user on auth page
+	 *  function redirect user on auth page
 	 * */
 	const refreshChecking = useCallback(async () => {
 		try {

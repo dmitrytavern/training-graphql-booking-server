@@ -31,11 +31,12 @@ async function start() {
 		}))
 
 		const pubsub = new PubSub()
+		const auth = new Auth()
 		const apolloServer = new ApolloServer({
 			typeDefs,
 			resolvers,
 			context: ({ req, res }) => {
-				const auth = new Auth(req, res, RefreshToken)
+				auth.setData(req, res, RefreshToken)
 
 				res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
 
