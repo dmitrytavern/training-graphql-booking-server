@@ -1,4 +1,10 @@
-import { Switch, Route, Redirect, Link, NavLink, useRouteMatch } from 'react-router-dom'
+import './Author.sass'
+import { Switch, Route, Redirect, useRouteMatch } from 'react-router-dom'
+
+import Container from "../../components/Container"
+import NavBar from "../../components/NavBar"
+import NavBarLink from "../../components/NavBarLink"
+import AuthorHeader from "./components/Header"
 
 import AuthorHome from './components/AuthorHome'
 import AuthorBooks from "./components/AuthorBooks"
@@ -8,39 +14,22 @@ const Author = () => {
 	const match = useRouteMatch()
 
 	return (
-		<div>
-			<h1>Author</h1>
+		<Container>
+			<AuthorHeader />
 
-			<button><Link to="/home">Back to home</Link></button>
-
-			<div className="nav-bar">
-				<NavLink to={`${match.path}/home`} className="nav-bar-link" activeClassName={'is-active'}>
-					Home
-				</NavLink>
-				<NavLink to={`${match.path}/books`} className="nav-bar-link" activeClassName={'is-active'}>
-					Books
-				</NavLink>
-				<NavLink to={`${match.path}/settings`} className="nav-bar-link" activeClassName={'is-active'}>
-					Settings
-				</NavLink>
-			</div>
+			<NavBar>
+				<NavBarLink to={`${match.path}/home`}>Home</NavBarLink>
+				<NavBarLink to={`${match.path}/books`}>Books</NavBarLink>
+				<NavBarLink to={`${match.path}/settings`}>Settings</NavBarLink>
+			</NavBar>
 
 			<Switch>
-				<Route path={`${match.path}/home`}>
-					<AuthorHome/>
-				</Route>
-
-				<Route path={`${match.path}/books`}>
-					<AuthorBooks/>
-				</Route>
-
-				<Route path={`${match.path}/settings`}>
-					<AuthorSettings/>
-				</Route>
-
+				<Route path={`${match.path}/home`}><AuthorHome/></Route>
+				<Route path={`${match.path}/books`}><AuthorBooks/></Route>
+				<Route path={`${match.path}/settings`}><AuthorSettings/></Route>
 				<Redirect to={`${match.path}/home`}/>
 			</Switch>
-		</div>
+		</Container>
 	)
 }
 

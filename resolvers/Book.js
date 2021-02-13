@@ -8,7 +8,10 @@ export default {
 	Book: {
 		owner: async (root, args, { db }, info) => {
 			const fields = getSelectedFields(info)
-			return db.AuthorModel.findById(root.owner).select(fields).lean()
+			return db.AuthorModel
+				.findById(root.owner)
+				.select(fields)
+				.lean()
 		}
 	},
 
@@ -37,16 +40,20 @@ export default {
 
 		book: async (root, { id }, { db }, info) => {
 			const fields = getSelectedFields(info)
-			return db.BookModel.findById(id).select(fields).lean()
+			return db.BookModel
+				.findById(id)
+				.select(fields)
+				.lean()
 		},
 	},
 
 	Mutation: {
-		async addBook(_, {title, owner, status}, {pubsub, db}) {
+		async addBook(_, {title, status}, {db, auth}) {
 			try {
+				const { id } = await auth.verify()
 
 				// Checking author exists
-				const existsAuthor = await db.AuthorModel.exists({_id: owner})
+				const existsAuthor = await db.AuthorModel.exists({_id: id})
 
 				if (!existsAuthor) {
 					return new ApolloError("Author not exists", "400", {
@@ -57,15 +64,15 @@ export default {
 				// Adding new book
 				const newBook = new db.BookModel({
 					title,
-					owner,
 					status,
+					owner: id,
 					reviews: 0
 				})
 
 				const res = await newBook.save()
 				const book = await res.populate('owner').execPopulate()
 
-				pubsub.publish(ADDED_NEW_BOOK, {addedBook: book})
+				// pubsub.publish(ADDED_NEW_BOOK, {addedBook: book})
 
 				// Update author, adding new book
 				await db.AuthorModel.findByIdAndUpdate(book.owner._id, {

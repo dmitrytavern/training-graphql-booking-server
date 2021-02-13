@@ -1,0 +1,22 @@
+.nav-bar-link
+  transition: border-bottom-color .05s ease-out, color .18s
+  display: block
+  padding: 8px 18px
+  font-weight: 500
+  font-size: 16px
+  color: #64aefb
+  border-bottom: 2px solid transparent
+
+  &:hover
+    transition: color .18s
+    color: #008ffa
+
+  &.is-active
+    transition: border-bottom-color .18s ease-out, color .18s
+    color: #008ffa
+    border-bottom-color: #008ffa
+
+@media (min-width: 568px)
+  .nav-bar-link
+    font-size: 18px
+    padding: 8px 30px

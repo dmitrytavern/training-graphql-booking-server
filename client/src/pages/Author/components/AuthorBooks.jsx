@@ -3,6 +3,8 @@ import { useQuery } from "@apollo/client"
 import * as Requests from "../../../api/book.api"
 import { useAuth } from "../../../contexts/auth.context"
 
+import BookForm from "../../../components/BookForm"
+
 const AuthorBooks = () => {
 	const { user } = useAuth()
 
@@ -15,7 +17,7 @@ const AuthorBooks = () => {
 
 	return (
 		<div>
-			Your books:
+			<BookForm />
 
 			{data && data.privateBooks.map((book, i) => (
 				<div key={i}>

@@ -21,3 +21,13 @@ export const GET_PRIVATE_BOOKS = gql`
 		}
 	}
 `
+
+export const ADD_BOOK = gql`
+	mutation AddBook($title: String, $status: String) {
+		addBook(title: $title, status: $status) {
+			title
+			reviews
+			status
+		}
+	}
+`
