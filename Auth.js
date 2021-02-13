@@ -142,12 +142,34 @@ export default class Auth {
 				})
 			}
 
-			await this.res.cookie(COOKIE_REFRESH_TOKEN_NAME, '', {
-				httpOnly: true,
-				path: '/graphql',
-				sameSite: true,
-				maxAge: 0
-			})
+			await this.clearCookie()
+		} catch (e) {
+			throw new AuthenticationError('AuthenticationError')
+		}
+	}
+
+
+	/**
+	 *  Logout from all sessions
+	 *
+	 *  If argument if null, function decodes token if it exists.
+	 *  If token and argument is not exists, than just clears cookie.
+	 * */
+	async logoutAll(userId) {
+		try {
+			let id = userId
+			const refreshToken  = this.refreshToken
+
+			if (refreshToken) {
+				if (id) {
+					const payload = jwt.decode(this.refreshToken)
+					id = payload.userId
+				}
+
+				await this.model.deleteMany({ userId: id })
+			}
+
+			await this.clearCookie()
 		} catch (e) {
 			throw new AuthenticationError('AuthenticationError')
 		}
@@ -155,6 +177,7 @@ export default class Auth {
 
 
 
+	/* Util functions */
 
 	/**
 	 *  Function update refresh token in database.
@@ -178,14 +201,13 @@ export default class Auth {
 	}
 
 
-
 	/**
 	 *  Create refresh token in database
 	 * */
 	async databaseCreateRefreshToken({ payload, newToken }) {
 		try {
 			const refreshToken = new this.model({
-				userId: payload.id,
+				userId: payload.userId,
 				refreshToken: newToken,
 				expiresIn: EXPIRES_IN_REFRESH_TOKEN
 			})
@@ -195,7 +217,6 @@ export default class Auth {
 			throw new AuthenticationError('databaseCreateRefreshToken: Unknown error')
 		}
 	}
-
 
 
 	/**
@@ -229,7 +250,6 @@ export default class Auth {
 	}
 
 
-
 	/**
 	 *  Generate tokens
 	 *
@@ -256,7 +276,6 @@ export default class Auth {
 	}
 
 
-
 	/**
 	 *  Set cookies
 	 *
@@ -273,5 +292,18 @@ export default class Auth {
 		} catch (e) {
 			throw new AuthenticationError('setCookie: Unknown error')
 		}
+	}
+
+
+	/**
+	 *  Clear cookies
+	 * */
+	async clearCookie() {
+		await this.res.cookie(COOKIE_REFRESH_TOKEN_NAME, '', {
+			httpOnly: true,
+			path: '/graphql',
+			sameSite: true,
+			maxAge: 0
+		})
 	}
 }

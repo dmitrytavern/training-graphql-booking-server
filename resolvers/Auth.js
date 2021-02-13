@@ -153,6 +153,8 @@ export default {
 				await db.UserModel.findByIdAndRemove(userId)
 				await db.AuthorModel.findByIdAndRemove(id)
 				await db.BookModel.deleteMany({ owner: id })
+
+				await auth.logoutAll(userId)
 			} catch (e) {
 				console.error(e)
 				throw new AuthenticationError('delete: Unknown error')

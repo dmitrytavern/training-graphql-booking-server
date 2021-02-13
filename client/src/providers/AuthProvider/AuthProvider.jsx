@@ -73,9 +73,9 @@ const Auth = (props) => {
 
 	const remove = useCallback(async () => {
 		await apolloRemove()
-		await apolloLogout()
 		setLogoutAuthor()
-	}, [apolloRemove, apolloLogout])
+	}, [apolloRemove])
+
 
 
 	/**
