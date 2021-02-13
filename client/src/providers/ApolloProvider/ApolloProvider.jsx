@@ -5,7 +5,7 @@ import useApolloAuth from '../hooks/provider.auth.hook'
 const Apollo = (props) => {
 	const { middleware: authMiddleware } = useApolloAuth()
 
-	let client = createApolloClient([
+	const client = createApolloClient([
 		authMiddleware
 	])
 

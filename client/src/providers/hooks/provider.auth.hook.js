@@ -6,39 +6,52 @@ import createApolloClient from "../ApolloProvider/createApolloClient"
 import * as Requests from "../../api/auth.api"
 
 let token = null
-let sendGetRefreshTokenRequest = false
+let refreshTokenRequestSent = false
 const checkingAccessExpired = async () => {
 	const { exp } = await jwtDecode(token)
-	return (Date.now() >= (exp * 1000) - 5 && !sendGetRefreshTokenRequest)
+	return Date.now() >= (exp * 1000) - 5
 }
 
 const useApolloAuth = () => {
 	const history = useHistory()
 
+	/**
+	 *  Make request for refresh token
+	 * */
 	const requestRefreshToken = async (client) => {
-		sendGetRefreshTokenRequest = true
-
 		try {
+			refreshTokenRequestSent = true
+
 			const { data } = await client.mutate({
 				mutation: Requests.AUTH_REFRESH_TOKEN_MUTATION
 			})
 
 			token = data.refreshToken.token
 
-			sendGetRefreshTokenRequest = false
+			refreshTokenRequestSent = false
 		} catch (e) {
-			sendGetRefreshTokenRequest = false
+			refreshTokenRequestSent = false
 			console.error(e)
 			throw new Error('[Auth]: Error refresh token')
 		}
 	}
 
-	const client = createApolloClient([
-		new ApolloLink(async (operation, forward) => {
+
+	/**
+	 *  Checks tokens
+	 *  Checks expires of access token. If date > exp time
+	 *  function sending request on refresh token. If happens error with
+	 *  auth function redirect user on auth page.
+	 *
+	 *  If something happens( invalid token, error from server )
+	 *  function redirect user on auth page
+	 * */
+	const refreshChecking = useCallback(async (client) => {
+		try {
 			if (token !== null) {
 				const expired = await checkingAccessExpired()
 
-				if (expired) {
+				if (expired && !refreshTokenRequestSent) {
 					await requestRefreshToken(client)
 						.catch(() => {
 							history.push('/auth/logout', {
@@ -47,17 +60,37 @@ const useApolloAuth = () => {
 						})
 				}
 			}
+		} catch (e) {
+			history.push('/auth')
+		}
+	}, [history])
 
-			operation.setContext({
-				headers: {
-					'Access-Control-Allow-Origin': 'http://localhost:4000',
-					authorization: token ? `Bearer ${token}` : '',
-				}
-			})
 
-			return forward(operation)
+	/**
+	 *  Create apollo middleware for setting headers for
+	 *  authorization users
+	 * */
+	const middleware = new ApolloLink(async (operation, forward) => {
+		await refreshChecking(client)
+
+		operation.setContext({
+			headers: {
+				'Access-Control-Allow-Origin': 'http://localhost:4000',
+				authorization: token ? `Bearer ${token}` : '',
+			}
 		})
-	])
+
+		return forward(operation)
+	})
+
+
+	/**
+	 *  Create new client for hook
+	 * */
+	const client = createApolloClient([middleware])
+
+
+	/* Actions */
 
 	/**
 	 *  Register request
@@ -140,7 +173,7 @@ const useApolloAuth = () => {
 			console.error(e)
 			throw new Error('[Auth]: Error refresh token')
 		}
-	}, [])
+	}, [client])
 
 
 	/**
@@ -174,53 +207,6 @@ const useApolloAuth = () => {
 			throw new Error('[Auth]: Error remove')
 		}
 	}, [client])
-
-
-	/**
-	 *  Checks tokens
-	 *  Checks expires of access token. If date > exp time
-	 *  function sending request on refresh token. If happens error with
-	 *  auth function redirect user on auth page.
-	 *
-	 *  If something happens( invalid token, error from server )
-	 *  function redirect user on auth page
-	 * */
-	const refreshChecking = useCallback(async () => {
-		try {
-			if (token !== null) {
-				const expired = await checkingAccessExpired()
-
-				if (expired) {
-					await refresh()
-						.catch(() => {
-							history.push('/auth/logout', {
-								makeRequest: false
-							})
-						})
-				}
-			}
-		} catch (e) {
-			history.push('/auth')
-		}
-	}, [history, refresh])
-
-
-	/**
-	 *  Create apollo middleware for setting headers for
-	 *  authorization users
-	 * */
-	const middleware = new ApolloLink(async (operation, forward) => {
-		await refreshChecking()
-
-		operation.setContext({
-			headers: {
-				'Access-Control-Allow-Origin': 'http://localhost:4000',
-				authorization: token ? `Bearer ${token}` : '',
-			}
-		})
-
-		return forward(operation)
-	})
 
 
 	return {
