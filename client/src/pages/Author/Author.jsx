@@ -1,30 +1,45 @@
-import { Link } from 'react-router-dom'
-import { useQuery } from "@apollo/client"
-import { useAuth } from "../../contexts/auth.context"
-import * as Requests from '../../api/book.api'
+import { Switch, Route, Redirect, Link, NavLink, useRouteMatch } from 'react-router-dom'
+
+import AuthorHome from './components/AuthorHome'
+import AuthorBooks from "./components/AuthorBooks"
+import AuthorSettings from "./components/AuthorSettings"
 
 const Author = () => {
-	const { user, remove } = useAuth()
-	const { data, refetch, loading } = useQuery(Requests.GET_PRIVATE_BOOKS, {
-		variables: { ownerId: user._id },
-	})
-
-	if (loading) return <p>Loading...</p>
+	const match = useRouteMatch()
 
 	return (
 		<div>
 			<h1>Author</h1>
 
 			<button><Link to="/home">Back to home</Link></button>
-			<button onClick={() => refetch({ ownerId: user._id })}>Reload</button>
-			<button onClick={() => remove()}>Remove Account</button>
 
-			{data && data.privateBooks.map((book, i) => (
-				<div key={i}>
-					<h3>{book.title}</h3>
-					<p>Status: {book.status}</p>
-				</div>
-			))}
+			<div className="nav-bar">
+				<NavLink to={`${match.path}/home`} className="nav-bar-link" activeClassName={'is-active'}>
+					Home
+				</NavLink>
+				<NavLink to={`${match.path}/books`} className="nav-bar-link" activeClassName={'is-active'}>
+					Books
+				</NavLink>
+				<NavLink to={`${match.path}/settings`} className="nav-bar-link" activeClassName={'is-active'}>
+					Settings
+				</NavLink>
+			</div>
+
+			<Switch>
+				<Route path={`${match.path}/home`}>
+					<AuthorHome/>
+				</Route>
+
+				<Route path={`${match.path}/books`}>
+					<AuthorBooks/>
+				</Route>
+
+				<Route path={`${match.path}/settings`}>
+					<AuthorSettings/>
+				</Route>
+
+				<Redirect to={`${match.path}/home`}/>
+			</Switch>
 		</div>
 	)
 }

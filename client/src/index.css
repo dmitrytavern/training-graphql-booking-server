@@ -16,3 +16,30 @@ a {
   text-decoration: none;
   color: #000000;
 }
+
+.nav-bar {
+  display: flex;
+  margin-bottom: 30px;
+  margin-top: 15px;
+}
+
+.nav-bar-link {
+  transition: color .3s, border-color .3s;
+  font-weight: 600;
+  font-size: 20px;
+  text-decoration: none;
+  margin: 0 15px;
+  color: #999;
+  padding-bottom: 5px;
+  border-bottom: 3px solid transparent;
+}
+.nav-bar-link:first-child {
+  margin-left: 0;
+}
+.nav-bar-link:last-child {
+  margin-right: 0;
+}
+.nav-bar-link.is-active {
+  color: #000;
+  border-color: #000;
+}

@@ -19,18 +19,18 @@ export default {
 			const fields = getSelectedFields(info)
 
 			return db.BookModel
-				.find({
-					owner: ownerId
-				})
+				.find({ owner: ownerId })
 				.select(fields)
 				.lean()
 		},
 
-		books: async (root, _, { db }, info) => {
+		books: async (root, { ownerId }, { db }, info) => {
 			const fields = getSelectedFields(info)
+			const filter = { status: 'published' }
+			if (ownerId) filter.owner = ownerId
 
 			return db.BookModel
-				.find({ status: 'published' })
+				.find(filter)
 				.select(fields)
 				.lean()
 		},

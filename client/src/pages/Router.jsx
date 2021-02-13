@@ -6,7 +6,6 @@ import Home from './Home'
 import Auth from "./Auth"
 import AuthLogout from "./Auth/components/AuthLogout"
 import Author from "./Author"
-import AuthorBooks from "./AuthorBooks"
 
 const Router = () => {
 	const { isAuth, loading } = useAuth()
@@ -28,16 +27,10 @@ const Router = () => {
 			)}
 
 			{isAuth && (
-				<Route path="/author" exact >
+				<Route path="/author">
 					<Author/>
 				</Route>
 			)}
-
-			{isAuth && (
-				<Route path="/author/books">
-					<AuthorBooks/>
-				</Route>
-				)}
 
 			{!loading && <Redirect to="/home"/>}
 		</Switch>

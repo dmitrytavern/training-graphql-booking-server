@@ -10,7 +10,7 @@ export const types = `
 
 export const queries = `
 	privateBooks(ownerId: String!): [Book]
-	books: [Book]
+	books(ownerId: String): [Book]
 	book(id: String): Book
 `
 
