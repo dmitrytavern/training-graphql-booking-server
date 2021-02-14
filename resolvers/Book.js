@@ -1,8 +1,5 @@
 import getSelectedFields from '../utils/getSelectedFields'
-import { ApolloError, withFilter } from 'apollo-server'
-
-const ADDED_NEW_BOOK = 'ADDED_NEW_BOOK'
-const CHAT_CHANNEL_SUBSCRIPTION = 'CHAT_CHANNEL_SUBSCRIPTION'
+import { ApolloError } from 'apollo-server'
 
 export default {
 	Book: {
@@ -72,7 +69,6 @@ export default {
 				const res = await newBook.save()
 				const book = await res.populate('owner').execPopulate()
 
-				// pubsub.publish(ADDED_NEW_BOOK, {addedBook: book})
 
 				// Update author, adding new book
 				await db.AuthorModel.findByIdAndUpdate(book.owner._id, {
@@ -128,46 +124,5 @@ export default {
 				})
 			}
 		},
-
-		async updateBookReview(_, {id}, {pubsub, db}) {
-			try {
-				const book = await db.BookModel.findByIdAndUpdate(id, {
-					$inc: {
-						reviews: 1
-					}
-				}, {
-					new: true
-				})
-
-				pubsub.publish(CHAT_CHANNEL_SUBSCRIPTION, {updatedBookReview: book})
-
-				return {
-					success: true
-				}
-			} catch (e) {
-				throw new ApolloError("Unknown error", "400", {
-					message: e
-				})
-			}
-		},
-	},
-
-	Subscription: {
-		addedBook: {
-			subscribe (_, _1, { pubsub }) {
-				return pubsub.asyncIterator(ADDED_NEW_BOOK)
-			}
-		},
-
-		updatedBookReview: {
-			subscribe: withFilter((_, _1, {pubsub}) => {
-				return pubsub.asyncIterator(CHAT_CHANNEL_SUBSCRIPTION)
-			}, (payload, variables) => {
-				const bookId = payload.updatedBookReview._id.toString()
-				const id = variables.id.toString()
-
-				return bookId === id
-			})
-		}
 	}
 }

@@ -17,7 +17,6 @@ schemas.forEach(schema => {
 	if (schema.types) types.push(schema.types)
 	if (schema.queries) queries.push(schema.queries)
 	if (schema.mutations) mutations.push(schema.mutations)
-	if (schema.subscriptions) subscriptions.push(schema.subscriptions)
 })
 
 export default `
@@ -33,9 +32,5 @@ export default `
 	
 	type Mutation {
 		${mutations.join('\n')}
-	}
-
-	type Subscription {
-		${subscriptions.join('\n')}
 	}
 `

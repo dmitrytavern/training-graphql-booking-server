@@ -3,7 +3,7 @@ import express from 'express'
 import expressCookieParser from 'cookie-parser'
 import expressCors from 'cors'
 import { createServer } from 'http'
-import { ApolloServer, PubSub } from "apollo-server-express"
+import { ApolloServer } from "apollo-server-express"
 import Auth from "./Auth"
 
 import typeDefs from './schema'
@@ -31,7 +31,6 @@ async function start() {
 			credentials: true,
 		}))
 
-		const pubsub = new PubSub()
 		const auth = new Auth(RefreshTokenModel)
 		const apolloServer = new ApolloServer({
 			typeDefs,
@@ -43,7 +42,6 @@ async function start() {
 
 				return {
 					auth,
-					pubsub,
 					db: {
 						UserModel,
 						BookModel,

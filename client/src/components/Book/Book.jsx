@@ -147,8 +147,6 @@ const Book = (props) => {
 				</ul>
 
 				<div className={classes.btnPanel}>
-					<button className={clsx([classes.btn, classes.btnView])}>View</button>
-
 					{type === 'control' && (
 						<button
 							className={clsx([classes.btn, classes.btnEdit])}
