@@ -12,6 +12,7 @@ const Book = (props) => {
 	const { type, className, id, title, reviews, status, owner } = props
 	const { user } = useAuth()
 	const [updateBook] = useMutation(Requests.UPDATE_BOOK)
+	const [deleteBook] = useMutation(Requests.DELETE_BOOK)
 	const [editing, setEditing] = useState(false)
 	const [form, setForm] = useState({
 		title,
@@ -97,6 +98,52 @@ const Book = (props) => {
 		}
 	}
 
+	const deleteHandler = () => {
+		console.log('DELETED')
+		deleteBook({
+			variables: { id },
+			update: (store) => {
+				const query = Requests.GET_PRIVATE_BOOKS
+				const variables = { ownerId: user._id }
+
+				const books = store.readQuery({ query, variables })
+
+				const checkingId = (b) => b._id !== id
+
+				const arrayBook = books.privateBooks.filter(checkingId)
+
+				if (books) {
+					store.writeQuery({
+						query,
+						variables,
+						data: {
+							privateBooks: [ ...arrayBook ]
+						}
+					})
+				}
+
+
+				const queryPub = Request.GET_BOOKS
+				const publishedBooks = store.readQuery({ query: queryPub, variables })
+
+				if (publishedBooks) {
+					const arrayBook = publishedBooks.books.filter(checkingId)
+
+					store.writeQuery({
+						query: queryPub,
+						variables,
+						data: {
+							books: [ ...arrayBook ]
+						}
+					})
+				}
+			}
+		})
+			.catch((err) => {
+				console.log(err)
+			})
+	}
+
 	// Class naming
 
 	const rootClassName = clsx({
@@ -154,7 +201,12 @@ const Book = (props) => {
 						>Edit</button>
 					)}
 
-					{type === 'control' && <button className={clsx([classes.btn, classes.btnRemove])}>Remove</button>}
+					{type === 'control' && (
+						<button
+							className={clsx([classes.btn, classes.btnRemove])}
+							onClick={deleteHandler}
+						>Remove</button>
+					)}
 				</div>
 			</div>
 		</div>
