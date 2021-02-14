@@ -8,6 +8,9 @@ import {
 	useRouteMatch,
 } from 'react-router-dom'
 
+import NavBar from "../../components/NavBar"
+import NavBarLink from "../../components/NavBarLink"
+
 import AuthLogin from "./components/AuthLogin"
 import AuthRegister from "./components/AuthRegister"
 
@@ -20,14 +23,14 @@ const Auth = () => {
 
 			<Link to="/">Back to home</Link>
 
-			<div className="nav-bar">
-				<NavLink to={`${match.path}/login`} className="nav-bar-link" activeClassName={'is-active'}>
+			<NavBar>
+				<NavBarLink to={`${match.path}/login`}>
 					Login
-				</NavLink>
-				<NavLink to={`${match.path}/register`} className="nav-bar-link" activeClassName={'is-active'}>
+				</NavBarLink>
+				<NavBarLink to={`${match.path}/register`}>
 					Register
-				</NavLink>
-			</div>
+				</NavBarLink>
+			</NavBar>
 
 			<Switch>
 				<Route path={`${match.path}/login`} component={AuthLogin} />

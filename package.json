@@ -1,14 +1,23 @@
 {
   "name": "test-graphql-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "Simple server on Graph Ql with React js and Mongodb",
   "main": "index.js",
   "scripts": {
     "start": "nodemon --exec npm run babel-node -- index.js",
     "babel-node": "babel-node --presets='@babel/preset-env'"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "React",
+    "Grapgh Ql",
+    "Mongo",
+    "Docker"
+  ],
+  "author": {
+    "name": "Dmitry Tavern",
+    "email": "dogger.work@gmail.com",
+    "url": "https://github.com/doggerWork"
+  },
   "license": "ISC",
   "dependencies": {
     "apollo-server": "^2.19.2",
