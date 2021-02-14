@@ -1,10 +1,12 @@
 import './BookForm.sass'
 import classes from "./classes"
 import { useState } from "react";
-import { useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client"
+import { useAuth } from "../../contexts/auth.context"
 import * as Request from '../../api/book.api'
 
 const BookForm = () => {
+	const { user } = useAuth()
 	const [addBook] = useMutation(Request.ADD_BOOK)
 	const [form, setForm] = useState({
 		title: '',
@@ -21,11 +23,47 @@ const BookForm = () => {
 			variables: {
 				title: form.title,
 				status: form.status
+			},
+			update: (store, { data }) => {
+				const newBook = data.addBook
+				const query = Request.GET_PRIVATE_BOOKS
+				const variables = { ownerId: user._id }
+
+				const books = store.readQuery({ query, variables })
+
+				if (books) {
+					store.writeQuery({
+						query,
+						variables,
+						data: {
+							privateBooks: [
+								...books.privateBooks,
+								newBook
+							]
+						}
+					})
+				}
+
+				if (newBook.status === 'published') {
+					const query = Request.GET_BOOKS
+
+					const publishedBooks = store.readQuery({ query, variables })
+
+					if (publishedBooks) {
+						store.writeQuery({
+							query,
+							variables,
+							data: {
+								books: [
+									...publishedBooks.books,
+									newBook
+								]
+							}
+						})
+					}
+				}
 			}
 		})
-			.then((res) => {
-				console.log(res)
-			})
 			.catch((res) => {
 				console.log(res)
 			})
