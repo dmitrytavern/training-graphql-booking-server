@@ -1,5 +1,9 @@
 # Graph Ql Apollo Server with JWT Auth
 
+<img src="https://raw.githubusercontent.com/doggerwork/test-graphql-server/master/_github/image_1.png">
+<img src="https://raw.githubusercontent.com/doggerwork/test-graphql-server/master/_github/image_2.png">
+<img src="https://raw.githubusercontent.com/doggerwork/test-graphql-server/master/_github/image_3.png">
+
 ## What is it?
 
 It test server, where you can create account and create books. Base functions:
