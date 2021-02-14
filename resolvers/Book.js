@@ -115,16 +115,13 @@ export default {
 
 		async updateBook(_, {id, title, status}, { db }) {
 			try {
-				await db.BookModel.findByIdAndUpdate(id, {
+				return await db.BookModel.findByIdAndUpdate(id, {
 					title,
 					status
 				}, {
-					upsert: true
+					upsert: true,
+					new: true
 				})
-
-				return {
-					success: true
-				}
 			} catch (e) {
 				throw new ApolloError("Unknown error", "400", {
 					message: e

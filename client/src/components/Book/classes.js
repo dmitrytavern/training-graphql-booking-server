@@ -15,7 +15,9 @@ const classes = {
 	btn: 'book__btn',
 	btnView: 'book__btn_view',
 	btnEdit: 'book__btn_edit',
-	btnRemove: 'book__btn_remove'
+	btnRemove: 'book__btn_remove',
+
+	form: 'book__form',
 }
 
 export default classes

@@ -46,7 +46,6 @@ const BookForm = () => {
 
 				if (newBook.status === 'published') {
 					const query = Request.GET_BOOKS
-
 					const publishedBooks = store.readQuery({ query, variables })
 
 					if (publishedBooks) {

@@ -17,7 +17,7 @@ export const queries = `
 export const mutations = `
   addBook(title: String, owner: String, status: String): Book
   deleteBook(id: String): Message
-  updateBook(id: String, title: String, status: String): Message
+  updateBook(id: String, title: String, status: String): Book
   updateBookReview(id: String): Message
 `
 

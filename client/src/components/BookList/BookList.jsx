@@ -13,6 +13,7 @@ const BookList = (props) => {
 				{bookType === 'view' && books && books.map((book, i) => (
 					<Book
 						key={i}
+						id={book._id}
 						className={classes.book}
 						type={bookType}
 						title={book.title}
@@ -24,6 +25,7 @@ const BookList = (props) => {
 				{bookType === 'control' && books && books.map((book, i) => (
 					<Book
 						key={i}
+						id={book._id}
 						className={classes.book}
 						type={bookType}
 						title={book.title}

@@ -3,7 +3,9 @@ import { gql } from '@apollo/client'
 export const GET_BOOKS = gql`
 	query GetBooks($ownerId: String) {
 		books(ownerId: $ownerId) {
+			_id
 			title
+			status
 			reviews
 			owner {
 				name
@@ -15,6 +17,7 @@ export const GET_BOOKS = gql`
 export const GET_PRIVATE_BOOKS = gql`
 	query GetPrivateBooks($ownerId: String!) {
 		privateBooks(ownerId: $ownerId) {
+			_id
 			title
 			reviews
 			status
@@ -28,6 +31,20 @@ export const ADD_BOOK = gql`
 			title
 			reviews
 			status
+		}
+	}
+`
+
+export const UPDATE_BOOK = gql`
+	mutation UpdateBook($id: String, $title: String, $status: String) {
+		updateBook(id: $id, title: $title, status: $status) {
+			_id
+			title
+			reviews
+			status
+			owner {
+				name
+			}
 		}
 	}
 `
