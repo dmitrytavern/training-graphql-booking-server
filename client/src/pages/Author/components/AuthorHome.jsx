@@ -1,13 +1,13 @@
 import React from 'react'
+import { useAuth } from "../../../contexts/auth.context"
 import { useQuery } from "@apollo/client"
 import * as Requests from "../../../api/book.api"
 
-import Book from "../../../components/Book"
-import { useAuth } from "../../../contexts/auth.context";
+import BookList from "../../../components/BookList"
 
 const AuthorHome = () => {
 	const { user } = useAuth()
-	const { data, refetch, loading } = useQuery(Requests.GET_BOOKS, {
+	const { data, loading } = useQuery(Requests.GET_BOOKS, {
 		variables: { ownerId: user._id },
 	})
 
@@ -15,18 +15,7 @@ const AuthorHome = () => {
 
 	return (
 		<div>
-			Recent books:
-
-			<button onClick={() => refetch()}>Reload</button>
-
-			{data && data.books.map((value, i) => (
-				<Book
-					key={i}
-					title={value.title}
-					owner={value.owner.name}
-					reviews={value.reviews}
-				/>
-			))}
+			{data && <BookList books={data.books}/>}
 		</div>
 	)
 }

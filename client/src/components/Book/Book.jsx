@@ -3,30 +3,34 @@ import propTypes from 'prop-types'
 import clsx from "clsx"
 import classes from "./classes"
 
-import { Button } from '@material-ui/core'
-
 const Book = (props) => {
-	const { type, title, reviews, owner } = props
+	const { type, className, title, reviews, status, owner } = props
 
 
 	// Class naming
 
 	const rootClassName = clsx({
 		[classes.root]: true,
-		[classes.rootHover]: false
+		[classes.rootHover]: false,
+		[className]: true
 	})
 
 	return (
 		<div className={rootClassName}>
 			<div className={classes.wrapper}>
 				<h2 className={classes.title}>{title}</h2>
-				<h3 className={classes.author}>{owner}</h3>
+				{type === 'view' && <h3 className={classes.author}>{owner}</h3>}
+
+				<ul className={classes.params}>
+					{type === 'control' && <li className={classes.status}>Status: {status}</li>}
+					<li>Reviews: {reviews}</li>
+				</ul>
 
 				<div className={classes.btnPanel}>
-					<Button className={classes.btnView}>View</Button>
+					<button className={clsx([classes.btn, classes.btnView])}>View</button>
 					{type === 'control' && ([
-						<Button color="primary" className={classes.btnEdit}>Edit</Button>,
-						<Button color="secondary" className={classes.btnRemove}>Remove</Button>
+						<button key={1} className={clsx([classes.btn, classes.btnEdit])}>Edit</button>,
+						<button key={2} className={clsx([classes.btn, classes.btnRemove])}>Remove</button>
 					])}
 				</div>
 			</div>
@@ -35,14 +39,20 @@ const Book = (props) => {
 }
 
 Book.defaultProps = {
-	type: 'view'
+	type: 'view',
+	className: ''
 }
 
 Book.propTypes = {
-	type: propTypes.string,
+	className: propTypes.string,
+	type: propTypes.oneOf([
+		'view',
+		'control'
+	]),
 	title: propTypes.string.isRequired,
-	reviews: propTypes.string.isRequired,
-	owner: propTypes.string.isRequired
+	reviews: propTypes.string,
+	owner: propTypes.string,
+	status: propTypes.string
 }
 
 export default Book

@@ -17,7 +17,7 @@ const Author = () => {
 		<Container>
 			<AuthorHeader />
 
-			<NavBar>
+			<NavBar className="author-nav-bar">
 				<NavBarLink to={`${match.path}/home`}>Home</NavBarLink>
 				<NavBarLink to={`${match.path}/books`}>Books</NavBarLink>
 				<NavBarLink to={`${match.path}/settings`}>Settings</NavBarLink>

@@ -6,6 +6,8 @@ const classes = {
 
 	title: 'book__title',
 
+	params: 'book__params',
+
 	author: 'book__author',
 
 	btnPanel: 'book__btn-panel',

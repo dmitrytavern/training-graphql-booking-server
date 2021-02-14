@@ -64,6 +64,12 @@ const BookForm = () => {
 				}
 			}
 		})
+			.then(() => {
+				setForm({
+					title: '',
+					status: 'draft'
+				})
+			})
 			.catch((res) => {
 				console.log(res)
 			})
@@ -78,22 +84,35 @@ const BookForm = () => {
 	return (
 		<form className={classes.root} onSubmit={submitHandler}>
 			<div className={classes.wrapper}>
-				<input
-					type="text"
-					placeholder="Name"
+				<div className={classes.title}>
+					Add book:
+				</div>
 
-					value={form.title}
-					onChange={changeHandler('title')}
-				/>
+				<div>
+					<input
+						type="text"
+						className={classes.input}
+						placeholder="Name"
 
-				<select
-					onChange={changeHandler('status')}
-				>
-					<option value="draft">Draft</option>
-					<option value="published">Published</option>
-				</select>
+						value={form.title}
+						onChange={changeHandler('title')}
+					/>
 
-				<button type="submit">Add book</button>
+					<select
+						className={classes.select}
+						value={form.status}
+						onChange={changeHandler('status')}
+					>
+						<option value="draft">Draft</option>
+						<option value="published">Published</option>
+					</select>
+
+					<button
+						className={classes.button}
+						type="submit"
+					>Add book</button>
+
+				</div>
 			</div>
 		</form>
 	)
