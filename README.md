@@ -3,6 +3,7 @@
 <img src="https://raw.githubusercontent.com/doggerwork/test-graphql-server/master/_github/image_1.png">
 <img src="https://raw.githubusercontent.com/doggerwork/test-graphql-server/master/_github/image_2.png">
 <img src="https://raw.githubusercontent.com/doggerwork/test-graphql-server/master/_github/image_3.png">
+<img src="https://raw.githubusercontent.com/doggerwork/test-graphql-server/master/_github/image_4.png">
 
 ## What is it?
 
