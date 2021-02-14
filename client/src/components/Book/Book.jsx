@@ -99,7 +99,6 @@ const Book = (props) => {
 	}
 
 	const deleteHandler = () => {
-		console.log('DELETED')
 		deleteBook({
 			variables: { id },
 			update: (store) => {
